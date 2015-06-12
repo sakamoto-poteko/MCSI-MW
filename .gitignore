@@ -1,0 +1,8 @@
+*.kdev4
+*~
+*.kdevelop
+*.kdevelop.filelist
+*.kdevelop.pcs
+*.kdevses
+.*kate-swp
+.jshintrc

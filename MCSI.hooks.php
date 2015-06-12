@@ -6,40 +6,36 @@
  * @ingroup Extensions
  */
 
-class MCSIHooks {
-    public static function onSendWatchlistEmailNotification($watchingUser, $title, $this)
-    {
-        return true;
-    }
-    
+class MCSIHooks { 
     public static function onPageContentSaveComplete($article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId)
     {
-        $pageTitle = $article->getTitle();
+        $title = $article->getTitle();
         
-        if (!self::shouldInvalidate($pageTitle)) {
+        if (!self::shouldInvalidate($title)) {
             // Cache not applicable
             return true;
         }
 
-        if (self::isTemplate($pageTitle)) {
-            MCSIBackendReq::invalidateTemplateCache(substr($pageTitle, 9));
+        if (self::isTemplate($title)) {
+            MCSIBackendReq::invalidateTemplateCache($title->getText());
         } else {
-            MCSIBackendReq::invalidatePageCache($pageTitle);
+            MCSIBackendReq::invalidatePageCache($title->getFullText());
         }
-        
+        self::notifyWatchlist($title, "Edit");
         return true;
     }
     
     public static function onArticleDeleteComplete(&$article, &$user, $reason, $id, $content, $logEntry) 
     {
-        $pageTitle = $article->getTitle();
+        $title = $article->getTitle();
         
-        if (!self::shouldInvalidate($pageTitle)) {
+        if (!self::shouldInvalidate($title)) {
             // Cache not applicable
             return true;
         }
     
-        MCSIBackendReq::deletePageCache($pageTitle);
+        MCSIBackendReq::deletePageCache($title->getFullText());
+        self::notifyWatchlist($title(), "Delete");
         return true;
     }
 
@@ -49,14 +45,19 @@ class MCSIHooks {
             return true;
         }
         
-        
-        MCSIBackendReq::deletePageCache($title);
-        if (self::isTemplate($newtitle)) {
-            MCSIBackendReq::invalidatePageCache($newtitle);    
+        if (self::isTemplate($title)) {
+            MCSIBackendReq::invalidateTemplateCache($title->getText());
         } else {
-            MCSIBackendReq::invalidateTemplateCache(substr($newtitle, 9));
+            MCSIBackendReq::invalidatePageCache($title->getFullText());
         }
         
+        if (self::isTemplate($newtitle)) {
+            MCSIBackendReq::invalidateTemplateCache($newtitle->getText());
+        } else {
+            MCSIBackendReq::invalidatePageCache($newtitle->getFullText());
+        }
+        
+        self::notifyWatchlist($title, "Move");
         return true;
     }
 
@@ -68,20 +69,57 @@ class MCSIHooks {
  */
     private static function isTemplate($title)
     {
-        if (substr_compare("Template:", $title, 0, 9) === 0) {
+        if ("Template" === $title->getSubjectNsText()) {
             return true;
         } else {
             return false;
-        }   
+        }
     }
     
     private static function shouldInvalidate($title)
     {
-        if (substr_compare("Special:", $title, 0, 8) === 0 
-        || substr_compare("Category:", $title, 0, 9) === 0) {
+        if ("Special" === $title->getSubjectNsText() || "Category" === $title->getSubjectNsText()) {
             return false;
         } else {
             return true;
         }
     }
+    
+    private static function notifyWatchlist($title, $action)
+    {
+        $watchingUsers =  self::getUserWatchingThePage($title);
+        $info = array(
+            "Title" => $title->getFullText(),
+            "Users" => $watchingUsers,
+            "Action" => $action
+        );
+        
+        $json = json_encode($info);
+        MCSIBackendReq::notifyWatchlist($json);
+    }
+    
+    private static function getUserWatchingThePage($title)
+    {
+        $dbr = wfGetDB(DB_SLAVE);
+        
+        $users = array();
+        
+        $res = $dbr->select(array('user', 'watchlist'),
+                            array('user_name'),
+                            array('wl_namespace' => $title->getNamespace(),
+                                  'wl_title' => $title->getDBKey()),
+                            __METHOD__,
+                            array(),
+                            array('watchlist' => array('INNER JOIN', array('wl_user=user_id'))));
+        
+        foreach($res as $row) {
+            $users[] = $row->user_name;
+        }
+        
+        return $users;
+    }
+    
 }
+
+
+

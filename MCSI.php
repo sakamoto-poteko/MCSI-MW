@@ -29,7 +29,6 @@ $wgExtensionCredits['other'][] = array(
     'descriptionmsg' => 'mcsi-desc',
 );
 
-
 $wgMCSIServerUrl    = 'https://moegirlproxy.azure-mobile.net';
 $wgMCSIServerAppKey = 'CHANGEME';
 //$wgMCSIServerUrl    = 'http://192.168.1.104:45826';
@@ -54,7 +53,6 @@ $wgAutoloadClasses['MCSIHooks'] = $dir . '/MCSI.hooks.php';
 
 // Register hooks
 // See also http://www.mediawiki.org/wiki/Manual:Hooks
-$wgHooks['SendWatchlistEmailNotification'][] = 'MCSIHooks::onSendWatchlistEmailNotification';
 $wgHooks['PageContentSave'][] = 'MCSIHooks::onPageContentSaveComplete';
 $wgHooks['ArticleDeleteComplete'][] = 'MCSIHooks::onArticleDeleteComplete';
 $wgHooks['TitleMoveComplete'][] = 'MCSIHooks::onTitleMoveComplete';

@@ -35,6 +35,14 @@
          self::sendRequest($url, "PUT");
      }
      
+     public static function notifyWatchlist($json)
+     {
+         global $wgMCSIServerUrl;
+         
+         $url = "{$wgMCSIServerUrl}/api/Notification/Watchlist";
+         self::sendRequest($url, "POST", $json, 'application/json');
+     }
+     
      private static function sendRequest($url, $method, $content = null, $content_type = 'text/plain')
      {
          global $wgMCSIServerAppKey;
@@ -45,16 +53,17 @@
          
          if (is_null($content)) {
              curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-ZUMO-APPLICATION: {$wgMCSIServerAppKey}",
-                                                      'Content-length: 0'));
+                                                          'Content-Length: 0'));
          } else {
              curl_setopt($curl, CURLOPT_CUSTOMREQUEST, "POST");
              curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-ZUMO-APPLICATION: {$wgMCSIServerAppKey}",
-                                                          'Content-length: ' . strlen($content)),
-                                                          'Content-Type: ' . $content_type);
+                                                          'Content-Type: ' . $content_type));
+             curl_setopt($curl, CURLOPT_POSTFIELDS, $content);
          }
          
-         curl_exec($curl);
+         $result = curl_exec($curl);
          curl_close($curl);
+         return $result;
      }
 
  }
