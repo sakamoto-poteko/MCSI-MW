@@ -50,6 +50,7 @@
          curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
          curl_setopt($curl, CURLOPT_HEADER, false);
          curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+         curl_setopt($curl, CURLOPT_TIMEOUT, 2);
          
          if (is_null($content)) {
              curl_setopt($curl, CURLOPT_HTTPHEADER, array("X-ZUMO-APPLICATION: {$wgMCSIServerAppKey}",

@@ -21,7 +21,7 @@ class MCSIHooks {
         } else {
             MCSIBackendReq::invalidatePageCache($title->getFullText());
         }
-        self::notifyWatchlist($title, "Edit");
+        self::notifyWatchlist($title, "Edit", $summary, $isMinor);
         return true;
     }
     
@@ -35,7 +35,7 @@ class MCSIHooks {
         }
     
         MCSIBackendReq::deletePageCache($title->getFullText());
-        self::notifyWatchlist($title(), "Delete");
+        self::notifyWatchlist($title, "Delete", $reason);
         return true;
     }
 
@@ -57,7 +57,7 @@ class MCSIHooks {
             MCSIBackendReq::invalidatePageCache($newtitle->getFullText());
         }
         
-        self::notifyWatchlist($title, "Move");
+        self::notifyWatchlist($title, "Move", $reason);
         return true;
     }
 
@@ -85,13 +85,15 @@ class MCSIHooks {
         }
     }
     
-    private static function notifyWatchlist($title, $action)
+    private static function notifyWatchlist($title, $action, $summary = null, $isMinor = false)
     {
-        $watchingUsers =  self::getUserWatchingThePage($title);
+        $watchingUsers = self::getUserWatchingThePage($title);
         $info = array(
             "Title" => $title->getFullText(),
             "Users" => $watchingUsers,
-            "Action" => $action
+            "Action" => $action,
+            "Summary" => $summary,
+            "IsMinor" => $isMinor
         );
         
         $json = json_encode($info);
