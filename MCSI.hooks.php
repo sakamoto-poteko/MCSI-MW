@@ -90,6 +90,7 @@ class MCSIHooks {
         $watchingUsers = self::getUserWatchingThePage($title);
         $info = array(
             "Title" => $title->getFullText(),
+            "ArticleId" => $title->getArticleID(),
             "Users" => $watchingUsers,
             "Action" => $action,
             "Summary" => $summary,
