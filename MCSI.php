@@ -23,7 +23,7 @@ $wgExtensionCredits['other'][] = array(
     'author' => array(
         'Sakamoto Poteko'
     ),
-    'version'  => '0.9.9',
+    'version'  => '0.9.91',
     'url' => 'about:blank',
     'license-name' => 'MIT',
     'descriptionmsg' => 'mcsi-desc',
