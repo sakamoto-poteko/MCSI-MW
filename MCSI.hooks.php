@@ -7,7 +7,7 @@
  */
 
 class MCSIHooks { 
-    public static function onPageContentSaveComplete($article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status, $baseRevId)
+    public static function onPageContentSaveComplete($article, $user, $content, $summary, $isMinor, $isWatch, $section, $flags, $revision, $status = null, $baseRevId = null)
     {
         $title = $article->getTitle();
         
